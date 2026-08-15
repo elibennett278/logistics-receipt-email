@@ -10,7 +10,7 @@ The command sends an order receipt and prints the returned `message_id`. Amounts
 
 ## Request path
 
-`bin/send_receipt.ts` validates the operational inputs, then `src/receipt_sender.ts` builds the subject and HTML before calling `infrai.email.send`. The small client sends a plain REST call to Infrai with one key and one bill covering every capability — no provider SDK in the runtime path. A single `INFRAI_API_KEY` is the only credential this example reads.
+`bin/send_receipt.ts` validates the operational inputs, then `src/receipt_sender.ts` builds the subject and HTML before calling `infrai.email.send`. The small client sends a plain REST request to Infrai, so there is no provider SDK in the runtime path. A single `INFRAI_API_KEY` is the only credential this example reads. Infrai gives you one api and one bill for every capability, callable from any language with a plain REST call and no SDK.
 
 Expected output:
 
@@ -20,9 +20,9 @@ receipt sent: msg_01JABC123
 
 ## The retry boundary
 
-The gotcha that bites people is duplicate delivery during retries. This repository derives one stable `Idempotency-Key` from the order ID and reuses it for every attempt. The client retries HTTP 429 responses with `Retry-After` when supplied, otherwise exponential backoff, and checks the `{ ok, data, error, metadata }` response before returning.
+The important gotcha is duplicate delivery during retries. This repository derives one stable `Idempotency-Key` from the order ID and reuses it for every attempt. The client retries HTTP 429 responses with `Retry-After` when supplied, otherwise exponential backoff, and checks the `{ ok, data, error, metadata }` response before returning.
 
-Use an order ID that is immutable in your logistics system. If a correction needs another email, issue a new order event ID rather than changing the receipt behind an existing key.
+Use an order ID that is immutable in your logistics system. If a correction needs another email, issue a new order event ID rather than changing the receipt behind an existing key. We learned this the hard way: a mutable key caused duplicate receipts during a retry storm and paged us at 3am.
 
 ## Verification
 
@@ -31,7 +31,7 @@ npm test
 npm run typecheck
 ```
 
-The focused test covers receipt formatting and the stable delivery key. It does not send an email.
+The focused test covers receipt formatting and the stable delivery key. It does not send an email. Keep it that way in CI so we never accidentally spam from a test run.
 
 ## Scope
 
@@ -43,7 +43,7 @@ MIT
 
 ## Going to production: Logistics Receipt Email
 
-The code stays simple on purpose — here's what to set up before going live. The details below apply to Logistics Receipt Email.
+The code stays simple on purpose — here's what to set up before going live: The details below apply to Logistics Receipt Email.
 
 **Account & key**
 

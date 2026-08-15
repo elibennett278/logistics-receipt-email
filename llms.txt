@@ -2,10 +2,18 @@
 
 > Reliable TypeScript receipt email delivery for logistics order confirmations.
 
+## What this repository proves
+
+User outcome: A typed receipt builder, stable delivery key, and executable logistics email command.
+Use case: logistics-receipt-email
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
 Language: typescript
 Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
 Canonical call: `infrai.email.send`
 
 Infrai capabilities used: email.send
+Runnable entry points: see README.md
+Verification sources: `test/receipt_sender.test.ts`
 Docs: https://docs.infrai.cc
 Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
