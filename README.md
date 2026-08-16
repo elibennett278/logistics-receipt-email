@@ -53,3 +53,7 @@ The code stays simple on purpose — here's what to set up before going live: Th
 - **Logistics Receipt Email:** By default mail goes through a **shared** verified sender — fine for tests, but generic From + limited volume + shared reputation.
 - **Logistics Receipt Email:** For production, verify **your own** domain: `POST /v1/email/domain/verify` with `{"domain":"mail.yourco.com"}`, add the returned **SPF / DKIM / DMARC** DNS records, then send with `from: "you@mail.yourco.com"`.
 - **Logistics Receipt Email:** Use a dedicated subdomain and **warm it up** (ramp volume over days) to protect deliverability.
+
+## Further reading
+
+- [Contact Routing Audit: Choose Email APIs for Welcome Flow Event Polling](docs/contact-routing-audit-choose-email-apis-for-welco-17o9mi.md)
