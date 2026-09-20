@@ -56,4 +56,5 @@ The code stays simple on purpose — here's what to set up before going live: Th
 
 ## Further reading
 
+- [Password Reset Transactional Email Templates — 3 Checks Before HTML Preview](docs/password-reset-transactional-email-templates-3-ch-1p96kb.md)
 - [Contact Routing Audit: Choose Email APIs for Welcome Flow Event Polling](docs/contact-routing-audit-choose-email-apis-for-welco-17o9mi.md)
