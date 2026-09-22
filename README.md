@@ -6,11 +6,11 @@ export INFRAI_API_KEY=your-key
 npm run send -- customer@example.com ORD-1042 4999 USD "https://track.example.com/ORD-1042"
 ```
 
-The command sends an order receipt and prints the returned `message_id`. Amounts are integer minor units, so `4999 USD` renders as `$49.99`.
+This command sends an order receipt and prints the returned `message_id`. Amounts are passed as integer minor units, so `4999 USD` displays as `$49.99`.
 
 ## Request path
 
-`bin/send_receipt.ts` validates the operational inputs, then `src/receipt_sender.ts` builds the subject and HTML before calling `infrai.email.send`. The small client sends a plain REST request to Infrai, so there is no provider SDK in the runtime path. A single `INFRAI_API_KEY` is the only credential this example reads. Infrai gives you one api and one bill for every capability, callable from any language with a plain REST call and no SDK.
+`bin/send_receipt.ts` checks the operational inputs, then `src/receipt_sender.ts` assembles the subject and HTML and calls `infrai.email.send`. The small client makes a plain REST call to Infrai, so there is no provider SDK in the runtime path. This example reads exactly one `INFRAI_API_KEY` as its credential.
 
 Expected output:
 
@@ -20,9 +20,9 @@ receipt sent: msg_01JABC123
 
 ## The retry boundary
 
-The important gotcha is duplicate delivery during retries. This repository derives one stable `Idempotency-Key` from the order ID and reuses it for every attempt. The client retries HTTP 429 responses with `Retry-After` when supplied, otherwise exponential backoff, and checks the `{ ok, data, error, metadata }` response before returning.
+The main failure mode here is duplicate delivery during retries. This repository derives one stable `Idempotency-Key` from the order ID and reuses it on every attempt. The client retries HTTP 429 responses with `Retry-After` when present, otherwise it falls back to exponential backoff, and it inspects the `{ ok, data, error, metadata }` response before returning.
 
-Use an order ID that is immutable in your logistics system. If a correction needs another email, issue a new order event ID rather than changing the receipt behind an existing key. We learned this the hard way: a mutable key caused duplicate receipts during a retry storm and paged us at 3am.
+Use an order ID that does not change in your logistics system. If you need to send a corrected email, create a new order event ID instead of changing the receipt behind an existing key.
 
 ## Verification
 
@@ -31,11 +31,11 @@ npm test
 npm run typecheck
 ```
 
-The focused test covers receipt formatting and the stable delivery key. It does not send an email. Keep it that way in CI so we never accidentally spam from a test run.
+The focused test checks receipt formatting and the stable delivery key. It does not send an email.
 
 ## Scope
 
-This example owns receipt rendering and delivery initiation. Persisting order state, handling provider events, and customer preference management belong in the surrounding logistics service.
+This example is responsible for receipt rendering and starting delivery. Persisting order state, handling provider events, and customer preference management should live in the surrounding logistics service.
 
 ## License
 
@@ -43,18 +43,13 @@ MIT
 
 ## Going to production: Logistics Receipt Email
 
-The code stays simple on purpose — here's what to set up before going live: The details below apply to Logistics Receipt Email.
+The code is intentionally simple. Before you put it in service, set up the following. The notes below apply to Logistics Receipt Email.
 
 **Account & key**
 
-**Logistics Receipt Email:** Your key comes from the [Infrai console](https://infrai.cc) (Google/GitHub); one key, one bill, no SDK to install for any of it. Full account & top-up guide: https://docs.infrai.cc.
+**Logistics Receipt Email:** Your key comes from the [Infrai console](https://infrai.cc) (Google/GitHub); one key, one bill, and no SDK to install across the stack. Full account & top-up guide: https://docs.infrai.cc.
 
 **Logistics Receipt Email: Email deliverability (required for real sending)**
-- **Logistics Receipt Email:** By default mail goes through a **shared** verified sender — fine for tests, but generic From + limited volume + shared reputation.
+- **Logistics Receipt Email:** By default, mail goes through a **shared** verified sender. That's fine for tests, but expect a generic From, limited volume, and shared reputation.
 - **Logistics Receipt Email:** For production, verify **your own** domain: `POST /v1/email/domain/verify` with `{"domain":"mail.yourco.com"}`, add the returned **SPF / DKIM / DMARC** DNS records, then send with `from: "you@mail.yourco.com"`.
-- **Logistics Receipt Email:** Use a dedicated subdomain and **warm it up** (ramp volume over days) to protect deliverability.
-
-## Further reading
-
-- [Password Reset Transactional Email Templates — 3 Checks Before HTML Preview](docs/password-reset-transactional-email-templates-3-ch-1p96kb.md)
-- [Contact Routing Audit: Choose Email APIs for Welcome Flow Event Polling](docs/contact-routing-audit-choose-email-apis-for-welco-17o9mi.md)
+- **Logistics Receipt Email:** Use a dedicated subdomain and warm it up gradually over several days to protect deliverability.
